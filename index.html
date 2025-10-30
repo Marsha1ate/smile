@@ -259,7 +259,7 @@ function showModal() {
 
 document.getElementById("closeModal").addEventListener("click", () => {
   document.getElementById("modal").style.display = "none";
-  tg?.sendData("achievement_full_set"); // отправка в чат-бот
+  tg?.sendData("achievement_full_set"); 
 });
 
 // Открытие пака
@@ -271,13 +271,13 @@ function openPack(pack) {
   coins -= pack.cost;
   let rewards = [];
 
-  let newCollected = false; // флаг, что добавлен хотя бы один новый смайлик
+  let newCollected = false; 
 
   for(let i=0;i<pack.cards;i++){
     const e = getRandomEmoji();
     rewards.push(e);
     if(e!=="💩" && !collection.includes(e)){
-      collection.push(e); // только новые смайлики
+      collection.push(e); 
       newCollected = true;
     }
   }
@@ -285,7 +285,6 @@ function openPack(pack) {
   alert(`Пак открылся! Выпало: ${rewards.join(" ")}`);
   updateUI();
 
-  // Проверяем модалку только если добавили новые смайлики
   if(newCollected && collection.length === SMILEYS.length){
     showModal();
   }
