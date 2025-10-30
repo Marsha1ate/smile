@@ -64,46 +64,51 @@
   .pack span { font-size: 1.5rem; }
 
   .album {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
-    gap: 10px;
-    margin-top: 30px;
-    width: 100%;
-    max-width: 360px;
-  }
-  .cell {
-    width: 100%;
-    padding-top: 100%; /* квадратная ячейка */
-    background: #555;
-    position: relative;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    color: white;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* всегда 3 столбца */
+  gap: 10px;
+  margin-top: 30px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.cell {
+  aspect-ratio: 1 / 1; /* квадрат */
+  background: #555;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1.5rem, 6vw, 2rem); /* адаптивный размер смайлика */
+  color: white;
+  position: relative;
+}
+
+.cell span {
+  position: absolute;
+  bottom: -18px;
+  font-size: 0.8rem;
+  color: #ccc;
+  text-align: center;
+  width: 100%;
+}
+
+.cell.active {
+  background: #ffd700;
+  color: black;
+}
+
+/* Медиазапрос для мелких экранов */
+@media (max-width: 400px) {
+  .album {
+    max-width: 300px;
+    gap: 8px;
   }
   .cell span {
-    position: absolute;
-    bottom: -18px;
-    font-size: 0.8rem;
-    color: #ccc;
-    text-align: center;
-    width: 100%;
+    font-size: 0.7rem;
   }
-  .cell.active { background: #ffd700; color: black; }
+}
 
-  /* Модалка */
-  #modal {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
   #modalContent {
     background: #ffd700;
     color: black;
@@ -218,8 +223,8 @@ function updateUI() {
 // Паки
 const PACKS = [
   { cost:5, cards:3 },
-  { cost:10, cards:4 },
-  { cost:3, cards:5 },
+  { cost:15, cards:4 },
+  { cost:30, cards:5 },
 ];
 
 function createPacks() {
