@@ -16,128 +16,79 @@
     min-height: 100vh;
     padding: 20px;
   }
-
-  h1 { 
-    text-align: center;
-    text-shadow: 0 0 15px rgba(255,255,255,0.6); 
-    margin-bottom: 20px; 
-    font-size: 2rem;
-  }
-
+  h1 { text-shadow: 0 0 15px rgba(255,255,255,0.6); margin-bottom: 20px; }
   .smiley-btn {
-    font-size: 6vw; /* адаптивный размер */
-    padding: 15px;
+    font-size: 4rem;
+    padding: 20px;
     margin: 20px;
     border-radius: 20px;
     background: #fff;
     cursor: pointer;
     transition: transform 0.1s;
-    min-width: 80px;
-    min-height: 80px;
   }
   .smiley-btn:hover { transform: scale(1.1); }
-
-  .info { 
-    margin: 10px 0; 
-    font-size: 1.2rem; 
-    text-align: center;
-  }
-
-  .packs { 
-    display: flex; 
-    flex-wrap: wrap; 
-    gap: 10px; 
-    margin-top: 20px; 
-    justify-content: center;
-  }
-  .pack { 
-    background: #222; 
-    padding: 10px 15px; 
-    border-radius: 10px; 
-    cursor: pointer; 
-    transition: 0.2s; 
-    flex: 1 1 120px; /* адаптивная ширина */
-    text-align: center;
-    min-width: 100px;
-  }
+  .info { margin: 10px 0; font-size: 1.2rem; }
+  .packs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+  .pack { background: #222; padding: 15px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
   .pack:hover { background: #444; }
-  .pack span { font-size: 1.5rem; }
+  .pack span { font-size: 2rem; }
 
   .album {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr); /* всегда 3 столбца */
-  gap: 10px;
-  margin-top: 30px;
-  width: 100%;
-  max-width: 360px;
-}
-
-.cell {
-  aspect-ratio: 1 / 1; /* квадрат */
-  background: #555;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(1.5rem, 6vw, 2rem); /* адаптивный размер смайлика */
-  color: white;
-  position: relative;
-}
-
-.cell span {
-  position: absolute;
-  bottom: -18px;
-  font-size: 0.8rem;
-  color: #ccc;
-  text-align: center;
-  width: 100%;
-}
-
-.cell.active {
-  background: #ffd700;
-  color: black;
-}
-
-/* Медиазапрос для мелких экранов */
-@media (max-width: 400px) {
-  .album {
-    max-width: 300px;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(3, 60px);
+    gap: 10px;
+    margin-top: 30px;
+  }
+  .cell {
+    width: 60px;
+    height: 60px;
+    background: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border-radius: 10px;
+    position: relative;
   }
   .cell span {
-    font-size: 0.7rem;
+    position: absolute;
+    bottom: -18px;
+    font-size: 0.8rem;
+    color: #ccc;
+    text-align:center;
+    width:100%;
   }
-}
+  .cell.active { background: #ffd700; color: black; }
 
+  /* Модалка */
+  #modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.7);
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+  }
   #modalContent {
-    background: #ffd700;
-    color: black;
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center;
-    font-size: 1.2rem;
-    max-width: 90%;
+    background:#ffd700;
+    color:black;
+    padding:30px;
+    border-radius:15px;
+    text-align:center;
+    font-size:1.5rem;
   }
   #closeModal {
-    margin-top: 15px;
-    padding: 8px 15px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-
-  /* Медиазапросы для маленьких экранов */
-  @media (max-width: 400px) {
-    h1 { font-size: 1.5rem; }
-    .smiley-btn { font-size: 12vw; min-width: 60px; min-height: 60px; }
-    .info { font-size: 1rem; }
-    .pack { flex: 1 1 100px; padding: 8px 10px; font-size: 0.9rem; }
-    .cell span { font-size: 0.7rem; }
+    margin-top:20px;
+    padding:10px 20px;
+    font-size:1rem;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
   }
 </style>
-
 </head>
 <body>
 
@@ -222,9 +173,9 @@ function updateUI() {
 
 // Паки
 const PACKS = [
-  { cost:5, cards:3 },
-  { cost:15, cards:4 },
-  { cost:30, cards:5 },
+  { cost:1, cards:3 },
+  { cost:2, cards:4 },
+  { cost:3, cards:5 },
 ];
 
 function createPacks() {
@@ -259,7 +210,7 @@ function showModal() {
 
 document.getElementById("closeModal").addEventListener("click", () => {
   document.getElementById("modal").style.display = "none";
-  tg?.sendData("achievement_full_set"); 
+  tg?.sendData("achievement_full_set"); // отправка в чат-бот
 });
 
 // Открытие пака
@@ -271,13 +222,13 @@ function openPack(pack) {
   coins -= pack.cost;
   let rewards = [];
 
-  let newCollected = false; 
+  let newCollected = false; // флаг, что добавлен хотя бы один новый смайлик
 
   for(let i=0;i<pack.cards;i++){
     const e = getRandomEmoji();
     rewards.push(e);
     if(e!=="💩" && !collection.includes(e)){
-      collection.push(e); 
+      collection.push(e); // только новые смайлики
       newCollected = true;
     }
   }
@@ -285,6 +236,7 @@ function openPack(pack) {
   alert(`Пак открылся! Выпало: ${rewards.join(" ")}`);
   updateUI();
 
+  // Проверяем модалку только если добавили новые смайлики
   if(newCollected && collection.length === SMILEYS.length){
     showModal();
   }
