@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Смайлик-кликер 😎</title>
+<style>
+  body {
+    font-family: "Segoe UI", sans-serif;
+    background: radial-gradient(circle at center, #0037a3, #000);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  h1 { text-shadow: 0 0 15px rgba(255,255,255,0.6); margin-bottom: 20px; }
+  .smiley-btn {
+    font-size: 4rem;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 20px;
+    background: #fff;
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .smiley-btn:hover { transform: scale(1.1); }
+  .info { margin: 10px 0; font-size: 1.2rem; }
+  .packs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+  .pack { background: #222; padding: 15px; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+  .pack:hover { background: #444; }
+  .pack span { font-size: 2rem; }
+
+  .album {
+    display: grid;
+    grid-template-columns: repeat(3, 60px);
+    gap: 10px;
+    margin-top: 30px;
+  }
+  .cell {
+    width: 60px;
+    height: 60px;
+    background: #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border-radius: 10px;
+    position: relative;
+  }
+  .cell span {
+    position: absolute;
+    bottom: -18px;
+    font-size: 0.8rem;
+    color: #ccc;
+    text-align:center;
+    width:100%;
+  }
+  .cell.active { background: #ffd700; color: black; }
+
+  /* Модалка */
+  #modal {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.7);
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+  }
+  #modalContent {
+    background:#ffd700;
+    color:black;
+    padding:30px;
+    border-radius:15px;
+    text-align:center;
+    font-size:1.5rem;
+  }
+  #closeModal {
+    margin-top:20px;
+    padding:10px 20px;
+    font-size:1rem;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>Смайлик-кликер 😎</h1>
+
+<div>
+  <button class="smiley-btn" id="clicker">😎</button>
+</div>
+
+<div class="info" id="coins">Монетки: 0</div>
+
+<h2>Паки со смайликами 🎁</h2>
+<div class="packs" id="packs"></div>
+
+<h2>Альбом 🗂</h2>
+<div class="album" id="album"></div>
+
+<!-- Модалка -->
+<div id="modal">
+  <div id="modalContent">
+    🎉 Молодец! Последний приз в дорожной сумке 🎉
+    <div>
+      <button id="closeModal">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const tg = window.Telegram?.WebApp;
+let coins = 0;
+
+// Список смайликов с шансами выпадения
+const SMILEYS = [
+  { emoji:"😎", name:"Cool", chance:0.1 },
+  { emoji:"😂", name:"Joy", chance:0.15 },
+  { emoji:"😍", name:"Love", chance:0.1 },
+  { emoji:"🥳", name:"Party", chance:0.1 },
+  { emoji:"🤯", name:"Mind", chance:0.1 },
+  { emoji:"😱", name:"Shock", chance:0.1 },
+  { emoji:"🤡", name:"Clown", chance:0.1 },
+  { emoji:"👽", name:"Alien", chance:0.1 },
+  { emoji:"🤖", name:"Robot", chance:0.05 },
+];
+
+const TRASH_CHANCE = 0.65; // 65% какашки
+let collection = [];
+
+// Инициализация альбома
+function initAlbum() {
+  const album = document.getElementById("album");
+  album.innerHTML = "";
+  SMILEYS.forEach(s => {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.innerHTML = s.emoji + `<span>${s.name}</span>`;
+    album.appendChild(cell);
+  });
+}
+initAlbum();
+
+// Обновление альбома
+function updateAlbum() {
+  const albumCells = document.querySelectorAll(".album .cell");
+  SMILEYS.forEach((s,i) => {
+    if(collection.includes(s.emoji)){
+      albumCells[i].classList.add("active");
+    }
+  });
+}
+
+// Кликер
+document.getElementById("clicker").addEventListener("click", () => {
+  coins++;
+  updateUI();
+});
+
+// UI обновление
+function updateUI() {
+  document.getElementById("coins").textContent = `Монетки: ${coins}`;
+  updateAlbum();
+}
+
+// Паки
+const PACKS = [
+  { cost:1, cards:3 },
+  { cost:2, cards:4 },
+  { cost:3, cards:5 },
+];
+
+function createPacks() {
+  const packsContainer = document.getElementById("packs");
+  packsContainer.innerHTML = "";
+  PACKS.forEach((p, i) => {
+    const pack = document.createElement("div");
+    pack.className = "pack";
+    pack.innerHTML = `🎁 Открыть ${p.cards} карт (💰${p.cost})`;
+    pack.addEventListener("click", () => openPack(p));
+    packsContainer.appendChild(pack);
+  });
+}
+createPacks();
+
+// Функция выпадения смайлика с шансами
+function getRandomEmoji() {
+  if(Math.random() < TRASH_CHANCE) return "💩"; // какашка
+  let rnd = Math.random();
+  let sum = 0;
+  for(let s of SMILEYS){
+    sum += s.chance;
+    if(rnd < sum) return s.emoji;
+  }
+  return SMILEYS[Math.floor(Math.random()*SMILEYS.length)].emoji;
+}
+
+// Модалка
+function showModal() {
+  document.getElementById("modal").style.display = "flex";
+}
+
+document.getElementById("closeModal").addEventListener("click", () => {
+  document.getElementById("modal").style.display = "none";
+  tg?.sendData("achievement_full_set"); // отправка в чат-бот
+});
+
+// Открытие пака
+function openPack(pack) {
+  if(coins < pack.cost){
+    alert("Недостаточно монет!");
+    return;
+  }
+  coins -= pack.cost;
+  let rewards = [];
+
+  let newCollected = false; // флаг, что добавлен хотя бы один новый смайлик
+
+  for(let i=0;i<pack.cards;i++){
+    const e = getRandomEmoji();
+    rewards.push(e);
+    if(e!=="💩" && !collection.includes(e)){
+      collection.push(e); // только новые смайлики
+      newCollected = true;
+    }
+  }
+
+  alert(`Пак открылся! Выпало: ${rewards.join(" ")}`);
+  updateUI();
+
+  // Проверяем модалку только если добавили новые смайлики
+  if(newCollected && collection.length === SMILEYS.length){
+    showModal();
+  }
+}
+
+
+updateUI(); 
+</script>
+</body>
+</html>
